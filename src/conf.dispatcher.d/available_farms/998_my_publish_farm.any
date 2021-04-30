@@ -1,0 +1,57 @@
+/mypublishfarm {  
+	/clientheaders {
+		$include "../clientheaders/ams_publish_clientheaders.any"
+		$include "../clientheaders/ams_common_clientheaders.any"
+	}
+	/virtualhosts {
+		$include "../vhosts/my_publish_vhosts.any"
+		$include "../vhosts/ams_publish_vhosts.any"
+	}
+	/renders {
+		$include "../renders/ams_publish_renders.any"
+	}
+	/filter {
+		$include "../filters/ams_publish_filters.any"
+		$include "../filters/my_publish_filters.any"
+	}
+	/vanity_urls {
+		/url    "/libs/granite/dispatcher/content/vanityUrls.html"
+		/file   "/tmp/vanity_urls"
+		/delay  300
+	}
+	/propagateSyndPost "0"
+	/cache {
+		/docroot "${PUBLISH_DOCROOT}"
+		/statfileslevel "2"
+		/allowAuthorized "0"
+		/serveStaleOnError "1"
+		/rules {
+			$include "../cache/ams_publish_cache.any"
+		}
+		/invalidate {
+			/0000 {
+				/glob "*"
+				/type "deny"
+			}
+			/0001 {
+				/glob "*.html"
+				/type "allow"
+			}
+		}
+		/allowedClients {
+			/0000 {
+				/glob "*.*.*.*"
+				/type "deny"
+			}
+			$include "../cache/ams_publish_invalidate_allowed.any"
+		}
+		/headers {
+			"Cache-Control"
+			"Content-Disposition"
+			"Content-Type"
+			"Expires"
+			"Last-Modified"
+			"X-Content-Type-Options"
+		}
+	}
+}

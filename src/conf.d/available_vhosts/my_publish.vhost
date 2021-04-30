@@ -1,0 +1,40 @@
+<VirtualHost *:80>
+	AllowEncodedSlashes On
+	ServerName	mypublish
+	ServerAlias	${PUBLISH_DEFAULT_HOSTNAME}
+	DocumentRoot	${PUBLISH_DOCROOT}
+	<IfModule mod_headers.c>
+		Header always add X-Dispatcher ${DISP_ID}
+		Header always add X-Vhost "mypublish"
+		Header merge X-Frame-Options SAMEORIGIN "expr=%{resp:X-Frame-Options}!='SAMEORIGIN'"
+		Header merge X-Content-Type-Options nosniff "expr=%{resp:X-Content-Type-Options}!='nosniff'"
+		Header append Vary User-Agent env=!dont-vary
+		Header always set Strict-Transport-Security "max-age=63072000; includeSubdomains;"
+	</IfModule>
+	<Directory />
+		<IfModule disp_apache2.c>
+			ModMimeUsePathInfo On
+			DirectorySlash Off
+			SetHandler dispatcher-handler
+		</IfModule>
+		Options FollowSymLinks
+		AllowOverride None
+		SetOutputFilter DEFLATE
+		SetEnvIfNoCase Request_URI \
+		\.(?:gif|jpe?g|png)$ no-gzip dont-vary
+	</Directory>
+	<Directory "${PUBLISH_DOCROOT}">
+		AllowOverride None
+		Require all granted
+	</Directory>
+	<IfModule disp_apache2.c>
+		DispatcherUseProcessedURL	1
+		DispatcherPassError		0
+	</IfModule>
+	<IfModule mod_rewrite.c>
+		ReWriteEngine	on
+		LogLevel warn rewrite:info
+		Include conf.d/rewrites/base_rewrite.rules
+		Include conf.d/rewrites/xforwarded_forcessl_rewrite.rules
+	</IfModule>
+</VirtualHost>
